@@ -1,25 +1,30 @@
 using EmailService.Models;
+using EmailTemplates.Helpers;
+using EmailTemplates.Services;
 using EmailTemplates.Views;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Azure.WebJobs.Extensions.Http;
 
 namespace TemplatedEmailFunction
 {
     public class EmailTemplateFunction
     {
         private readonly Services.EmailService _emailService;
+        private readonly IRazorViewToStringRenderer _razorViewToStringRenderer;
 
-        public EmailTemplateFunction(Services.EmailService emailService)
+        public EmailTemplateFunction(Services.EmailService emailService, IRazorViewToStringRenderer razorViewToStringRenderer)
         {
             _emailService = emailService;
+            _razorViewToStringRenderer = razorViewToStringRenderer;
         }
 
         [FunctionName("SendEmailTemplateHttp")]
@@ -31,7 +36,26 @@ namespace TemplatedEmailFunction
 
             //TODO: Make it so we can get a sample payload
 
-            return await SendEmail(req, log);
+            //return await SendEmail(req, log);
+            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+
+            var data = JsonConvert.DeserializeObject<EmailTemplateRequest>(requestBody);
+
+            BaseEmailClass deserializedModel = TemplateDeserializer.GetEmailData(data.Data, data.DataType);
+
+            try
+            {
+                string templateName = data.DataType.Replace("Model", string.Empty);
+
+                var r = await _razorViewToStringRenderer.RenderViewToStringAsync(templateName, deserializedModel);
+
+                return new OkObjectResult("Email Sent");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         }
 
         [FunctionName("GetSampleEmailTemplate")]

@@ -10,6 +10,7 @@ using TemplatedEmailFunction;
 using TemplatedEmailFunction.Services;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.ObjectPool;
+using EmailTemplates.Services;
 
 [assembly: FunctionsStartup(typeof(Startup))]
 namespace TemplatedEmailFunction
@@ -39,6 +40,8 @@ namespace TemplatedEmailFunction
 
             builder.Services.AddSingleton<IStringLocalizerFactory, ResourceManagerStringLocalizerFactory>();
             builder.Services.AddSingleton<ObjectPoolProvider, DefaultObjectPoolProvider>();
+
+            builder.Services.AddScoped<IRazorViewToStringRenderer, RazorViewToStringRenderer>();
 
             builder.Services.AddScoped<RazorViewTemplateCompilerService>();
             builder.Services.AddScoped<Services.EmailService>();
