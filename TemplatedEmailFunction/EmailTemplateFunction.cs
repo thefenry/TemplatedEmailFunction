@@ -1,5 +1,4 @@
 using EmailService.Models;
-using EmailTemplates.Helpers;
 using EmailTemplates.Services;
 using EmailTemplates.Views;
 using Microsoft.AspNetCore.Http;
@@ -8,7 +7,6 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -36,26 +34,7 @@ namespace TemplatedEmailFunction
 
             //TODO: Make it so we can get a sample payload
 
-            //return await SendEmail(req, log);
-            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-
-            var data = JsonConvert.DeserializeObject<EmailTemplateRequest>(requestBody);
-
-            BaseEmailClass deserializedModel = TemplateDeserializer.GetEmailData(data.Data, data.DataType);
-
-            try
-            {
-                string templateName = data.DataType.Replace("Model", string.Empty);
-
-                var r = await _razorViewToStringRenderer.RenderViewToStringAsync(templateName, deserializedModel);
-
-                return new OkObjectResult("Email Sent");
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
+            return await SendEmail(req, log);
         }
 
         [FunctionName("GetSampleEmailTemplate")]

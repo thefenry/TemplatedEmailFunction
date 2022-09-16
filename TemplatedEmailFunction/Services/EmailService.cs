@@ -1,5 +1,6 @@
 ﻿using EmailService.Models;
 using EmailTemplates.Helpers;
+using EmailTemplates.Services;
 using EmailTemplates.Views;
 using Microsoft.Extensions.Logging;
 using System;
@@ -10,9 +11,9 @@ namespace TemplatedEmailFunction.Services
     public class EmailService
     {
         private readonly ILogger<EmailService> _log;
-        private readonly RazorViewTemplateCompilerService _templateCompilerService;
+        private readonly IRazorViewToStringRenderer _templateCompilerService;
 
-        public EmailService(ILogger<EmailService> log, RazorViewTemplateCompilerService templateCompilerService)
+        public EmailService(ILogger<EmailService> log, IRazorViewToStringRenderer templateCompilerService)
         {
             _log = log;
             _templateCompilerService = templateCompilerService;
@@ -28,7 +29,7 @@ namespace TemplatedEmailFunction.Services
             {
                 BaseEmailClass deserializedModel = TemplateDeserializer.GetEmailData(emailRequest.Data, emailRequest.DataType);
 
-                string htmlContent = await _templateCompilerService.RenderViewToStringAsync(deserializedModel, emailRequest.DataType);
+                string htmlContent = await _templateCompilerService.RenderViewToStringAsync(emailRequest.DataType, deserializedModel);
 
                 if (string.IsNullOrWhiteSpace(htmlContent))
                 {

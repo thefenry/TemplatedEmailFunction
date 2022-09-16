@@ -1,16 +1,15 @@
-﻿using Microsoft.Azure.Functions.Extensions.DependencyInjection;
+﻿using EmailTemplates.Services;
+using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Azure.WebJobs.Host.Bindings;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.ObjectPool;
 using Microsoft.Extensions.Options;
 using System;
 using System.IO;
 using System.Reflection;
-using Microsoft.Extensions.Configuration;
 using TemplatedEmailFunction;
-using TemplatedEmailFunction.Services;
-using Microsoft.Extensions.Localization;
-using Microsoft.Extensions.ObjectPool;
-using EmailTemplates.Services;
 
 [assembly: FunctionsStartup(typeof(Startup))]
 namespace TemplatedEmailFunction
@@ -42,8 +41,6 @@ namespace TemplatedEmailFunction
             builder.Services.AddSingleton<ObjectPoolProvider, DefaultObjectPoolProvider>();
 
             builder.Services.AddScoped<IRazorViewToStringRenderer, RazorViewToStringRenderer>();
-
-            builder.Services.AddScoped<RazorViewTemplateCompilerService>();
             builder.Services.AddScoped<Services.EmailService>();
 
             builder.Services.AddMvcCore()

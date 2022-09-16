@@ -27,10 +27,12 @@ namespace EmailTemplates.Services
             _serviceProvider = serviceProvider;
         }
 
-        public async Task<string> RenderViewToStringAsync<TModel>(string viewName, TModel model)
+        public async Task<string> RenderViewToStringAsync<TModel>(string templateModelName, TModel model)
         {
+            string templateName = templateModelName.Replace("Model", string.Empty);
+
             var actionContext = GetActionContext();
-            var view = FindView(actionContext, viewName);
+            var view = FindView(actionContext, templateName);
 
             await using var output = new StringWriter();
             var viewContext = new ViewContext(
